@@ -1,16 +1,20 @@
-version: "3"
-
 services:
   postgres:
-    image: postgres:latest
-    container_name: fsw-foods-postgres
+    image: postgres:16-alpine
+    container_name: dd-foods-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dd_foods
+      POSTGRES_USER: dd_foods
+      POSTGRES_PASSWORD: dd_foods_local
     ports:
       - "5432:5432"
     volumes:
-      - ./.postgres-data:/var/lib/postgresql/data
+      - dd-foods-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dd_foods -d dd_foods"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
-  .postgres-data:
+  dd-foods-postgres-data:
