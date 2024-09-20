@@ -2,15 +2,22 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "../_lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../_lib/auth";
 
-export const toggleFavoriteRestaurant = async (
-  userId: string,
-  restaurantId: string,
-) => {
-  const isFavorite = await db.userFavoriteRestaurant.findFirst({
+export const toggleFavoriteRestaurant = async (restaurantId: string) => {
+  const session = await getServerSession(authOptions);
+  const userId = session?.user.id;
+
+  if (!userId) throw new Error("É necessário entrar para salvar favoritos.");
+
+  // A sessao define a propriedade; IDs de usuario enviados pelo navegador sao ignorados.
+  const isFavorite = await db.userFavoriteRestaurant.findUnique({
     where: {
-      userId,
-      restaurantId,
+      userId_restaurantId: {
+        userId,
+        restaurantId,
+      },
     },
   });
 

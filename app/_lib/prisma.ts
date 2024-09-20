@@ -9,6 +9,7 @@ let prisma: PrismaClient;
 if (process.env.NODE_ENV === "production") {
   prisma = new PrismaClient();
 } else {
+  // Reutiliza o client entre hot reloads para evitar conexoes extras em desenvolvimento.
   if (!global.cachedPrisma) {
     global.cachedPrisma = new PrismaClient();
   }
