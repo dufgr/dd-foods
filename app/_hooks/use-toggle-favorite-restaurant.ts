@@ -17,11 +17,13 @@ const useToggleFavoriteRestaurant = ({
 }: UseToggleFavoriteRestaurantProps) => {
   const router = useRouter();
 
+  // Mantem o estado visual e a notificacao alinhados ao resultado da acao.
   const handleFavoriteClick = async () => {
     if (!userId) return;
 
     try {
-      await toggleFavoriteRestaurant(userId, restaurantId);
+      await toggleFavoriteRestaurant(restaurantId);
+      router.refresh();
 
       toast(
         restaurantIsFavorited
@@ -34,7 +36,7 @@ const useToggleFavoriteRestaurant = ({
           },
         },
       );
-    } catch (error) {
+    } catch {
       toast.error("Erro ao favoritar restaurante.");
     }
   };

@@ -5,6 +5,7 @@ const prismaClient = new PrismaClient();
 const description =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean nec nisl lorem. Praesent pharetra, sapien ut fringilla malesuada, nisi felis ullamcorper ex, eu consectetur elit dolor sed dolor. Praesent orci mi, auctor aliquet semper vitae, volutpat quis augue. Cras porta sapien nec pharetra laoreet. Sed at velit sit amet mauris varius volutpat sit amet id mauris. Maecenas vitae mattis ante. Morbi nulla quam, sagittis at orci eu, scelerisque auctor neque.";
 
+// Popula hamburguerias e complementos compartilhados do catalogo.
 const createBurguers = async (
   desertsCategoryId: string,
   juicesCategoryId: string,
@@ -199,6 +200,7 @@ const createBurguers = async (
   }
 };
 
+// Popula pizzarias e seus produtos de destaque.
 const createPizzas = async (
   desertsCategoryId: string,
   juicesCategoryId: string,
@@ -375,6 +377,7 @@ const createPizzas = async (
   }
 };
 
+// Popula restaurantes japoneses e pratos do cardapio.
 const createJapanese = async (
   desertsCategoryId: string,
   juicesCategoryId: string,
@@ -569,6 +572,7 @@ const createJapanese = async (
   }
 };
 
+// Popula restaurantes brasileiros e pratos principais.
 const createBrazilian = async (
   desertsCategoryId: string,
   juicesCategoryId: string,
@@ -763,6 +767,7 @@ const createBrazilian = async (
   }
 };
 
+// Adiciona as sobremesas compartilhadas a um restaurante.
 const createDeserts = async (restaurantId: string, categoryId: string) => {
   await prismaClient.restaurant.update({
     where: {
@@ -897,6 +902,7 @@ const createDeserts = async (restaurantId: string, categoryId: string) => {
   }
 };
 
+// Adiciona as bebidas compartilhadas a um restaurante.
 const createJuices = async (restaurantId: string, categoryId: string) => {
   await prismaClient.restaurant.update({
     where: {
@@ -1031,6 +1037,7 @@ const createJuices = async (restaurantId: string, categoryId: string) => {
   }
 };
 
+// Cria categorias comuns antes de popular cada familia de restaurantes.
 const main = async () => {
   const desertsCategory = await prismaClient.category.create({
     data: {

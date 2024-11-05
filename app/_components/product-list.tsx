@@ -1,25 +1,19 @@
-import { Prisma } from "@prisma/client";
 import ProductItem from "./product-item";
+import type { ProductCardData } from "../_lib/client-data";
+import Carousel from "./carousel";
 
 interface ProductListProps {
-  products: Prisma.ProductGetPayload<{
-    include: {
-      restaurant: {
-        select: {
-          name: true;
-        };
-      };
-    };
-  }>[];
+  products: ProductCardData[];
 }
 
+// Mantem os produtos em uma faixa rolavel adequada a telas estreitas.
 const ProductList = ({ products }: ProductListProps) => {
   return (
-    <div className="flex gap-4 overflow-x-scroll px-5 [&::-webkit-scrollbar]:hidden">
+    <Carousel ariaLabel="Carrossel de produtos">
       {products.map((product) => (
         <ProductItem key={product.id} product={product} />
       ))}
-    </div>
+    </Carousel>
   );
 };
 

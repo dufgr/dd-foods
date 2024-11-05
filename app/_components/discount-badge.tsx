@@ -5,6 +5,7 @@ interface DiscountBadgeProps {
   product: Pick<Product, "discountPercentage">;
 }
 
+// Destaca o percentual de desconto associado ao produto.
 const DiscountBadge = ({ product }: DiscountBadgeProps) => {
   return (
     <div className="flex items-center gap-[2px] rounded-full bg-primary px-2 py-[2px] text-white">

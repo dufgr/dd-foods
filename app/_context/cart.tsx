@@ -5,8 +5,8 @@ import { Prisma } from "@prisma/client";
 import { ReactNode, createContext, useState } from "react";
 import { calculateProductTotalPrice } from "../_helpers/price";
 
-export interface CartProduct
-  extends Prisma.ProductGetPayload<{
+export type CartProduct = Omit<
+  Prisma.ProductGetPayload<{
     include: {
       restaurant: {
         select: {
@@ -16,9 +16,17 @@ export interface CartProduct
         };
       };
     };
-  }> {
+  }>,
+  "price" | "restaurant"
+> & {
+  price: number;
+  restaurant: {
+    id: string;
+    deliveryFee: number;
+    deliveryTimeMinutes: number;
+  };
   quantity: number;
-}
+};
 
 interface ICartContext {
   products: CartProduct[];
@@ -55,6 +63,7 @@ export const CartContext = createContext<ICartContext>({
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<CartProduct[]>([]);
 
+  // A taxa e cobrada uma vez por restaurante e nao altera o subtotal de itens.
   const subtotalPrice = products.reduce((acc, product) => {
     return acc + Number(product.price) * product.quantity;
   }, 0);
@@ -62,14 +71,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const totalPrice =
     products.reduce((acc, product) => {
       return acc + calculateProductTotalPrice(product) * product.quantity;
-    }, 0) + Number(products?.[0]?.restaurant?.deliveryFee);
+    }, 0) + (products[0] ? Number(products[0].restaurant.deliveryFee) : 0);
 
   const totalQuantity = products.reduce((acc, product) => {
     return acc + product.quantity;
   }, 0);
 
   const totalDiscounts =
-    subtotalPrice - totalPrice + Number(products?.[0]?.restaurant?.deliveryFee);
+    subtotalPrice -
+    totalPrice +
+    (products[0] ? Number(products[0].restaurant.deliveryFee) : 0);
 
   const clearCart = () => {
     return setProducts([]);
@@ -104,7 +115,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (cartProduct.id === productId) {
           return {
             ...cartProduct,
-            quantity: cartProduct.quantity + 1,
+            quantity: Math.min(cartProduct.quantity + 1, 50),
           };
         }
 
@@ -125,33 +136,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     product,
     emptyCart,
   }) => {
-    if (emptyCart) {
-      setProducts([]);
-    }
-
-    // VERIFICAR SE O PRODUTO JÁ ESTÁ NO CARRINHO
-    const isProductAlreadyOnCart = products.some(
-      (cartProduct) => cartProduct.id === product.id,
-    );
-
-    // SE ELE ESTIVER, AUMENTAR A SUA QUANTIDADE
-    if (isProductAlreadyOnCart) {
-      return setProducts((prev) =>
-        prev.map((cartProduct) => {
-          if (cartProduct.id === product.id) {
-            return {
-              ...cartProduct,
-              quantity: cartProduct.quantity + product.quantity,
-            };
-          }
-
-          return cartProduct;
-        }),
+    // Substitui e mescla no mesmo updater para evitar estado desatualizado.
+    setProducts((prev) => {
+      const currentProducts = emptyCart ? [] : prev;
+      const existingProduct = currentProducts.find(
+        (cartProduct) => cartProduct.id === product.id,
       );
-    }
 
-    // SE NÃO, ADICIONÁ-LO COM A QUANTIDADE RECEBIDA
-    setProducts((prev) => [...prev, product]);
+      if (existingProduct) {
+        return currentProducts.map((cartProduct) =>
+          cartProduct.id === product.id
+            ? {
+                ...cartProduct,
+                quantity: Math.min(cartProduct.quantity + product.quantity, 50),
+              }
+            : cartProduct,
+        );
+      }
+
+      return [...currentProducts, product];
+    });
   };
 
   return (

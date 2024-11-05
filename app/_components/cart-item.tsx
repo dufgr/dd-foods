@@ -9,6 +9,7 @@ interface CartItemProps {
   cartProduct: CartProduct;
 }
 
+// Mantem quantidade, remocao e preco de cada item ligados ao contexto.
 const CartItem = ({ cartProduct }: CartItemProps) => {
   const {
     decreaseProductQuantity,
@@ -94,6 +95,7 @@ const CartItem = ({ cartProduct }: CartItemProps) => {
   );
 };
 
+// Evita rerender quando apenas outro item do carrinho foi alterado.
 export default memo(CartItem, (prev, next) => {
   return prev.cartProduct.quantity === next.cartProduct.quantity;
 });

@@ -4,9 +4,12 @@ import { formatCurrency } from "../_helpers/price";
 import { Restaurant } from "@prisma/client";
 
 interface DeliveryInfoProps {
-  restaurant: Pick<Restaurant, "deliveryFee" | "deliveryTimeMinutes">;
+  restaurant: Pick<Restaurant, "deliveryTimeMinutes"> & {
+    deliveryFee: Restaurant["deliveryFee"] | number;
+  };
 }
 
+// Apresenta custo de entrega e prazo com os dados do restaurante.
 const DeliveryInfo = ({ restaurant }: DeliveryInfoProps) => {
   return (
     <>

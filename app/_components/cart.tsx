@@ -6,7 +6,6 @@ import { formatCurrency } from "../_helpers/price";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { createOrder } from "../_actions/order";
-import { OrderStatus } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { Loader2 } from "lucide-react";
 import {
@@ -38,35 +37,18 @@ const Cart = ({ setIsOpen }: CartProps) => {
   const { products, subtotalPrice, totalPrice, totalDiscounts, clearCart } =
     useContext(CartContext);
 
+  // Envia somente IDs e quantidades; o servidor recalcula e valida os valores.
   const handleFinishOrderClick = async () => {
     if (!data?.user) return;
-
-    const restaurant = products[0].restaurant;
 
     try {
       setIsSubmitLoading(true);
 
       await createOrder({
-        subtotalPrice,
-        totalDiscounts,
-        totalPrice,
-        deliveryFee: restaurant.deliveryFee,
-        deliveryTimeMinutes: restaurant.deliveryTimeMinutes,
-        restaurant: {
-          connect: { id: restaurant.id },
-        },
-        status: OrderStatus.CONFIRMED,
-        user: {
-          connect: { id: data.user.id },
-        },
-        products: {
-          createMany: {
-            data: products.map((product) => ({
-              productId: product.id,
-              quantity: product.quantity,
-            })),
-          },
-        },
+        items: products.map((product) => ({
+          productId: product.id,
+          quantity: product.quantity,
+        })),
       });
 
       clearCart();
@@ -81,6 +63,7 @@ const Cart = ({ setIsOpen }: CartProps) => {
       });
     } catch (error) {
       console.error(error);
+      toast.error("Não foi possível finalizar o pedido. Tente novamente.");
     } finally {
       setIsSubmitLoading(false);
     }
@@ -91,7 +74,7 @@ const Cart = ({ setIsOpen }: CartProps) => {
       <div className="flex h-full flex-col py-5">
         {products.length > 0 ? (
           <>
-            <div className="flex-auto space-y-4">
+            <div className="min-h-0 flex-auto space-y-4 overflow-y-auto">
               {products.map((product) => (
                 <CartItem key={product.id} cartProduct={product} />
               ))}

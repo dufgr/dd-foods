@@ -14,14 +14,16 @@ const Search = () => {
     setSearch(e.target.value);
   };
 
+  // Normaliza o termo e preserva caracteres especiais ao navegar para a busca.
   const handleSearchSubmit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
 
-    if (!search) {
+    const query = search.trim();
+    if (!query) {
       return;
     }
 
-    router.push(`/restaurants?search=${search}`);
+    router.push(`/restaurants?search=${encodeURIComponent(query)}`);
   };
 
   return (

@@ -22,22 +22,30 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 
+// Exibe navegacao, login e a identidade DD Foods em todos os tamanhos.
 const Header = () => {
   const { data } = useSession();
+  const nameParts = data?.user?.name?.trim().split(/\s+/).filter(Boolean) ?? [];
 
   const handleSignOutClick = () => signOut();
-  const handleSignInClick = () => signIn();
+  const handleSignInClick = () =>
+    signIn(
+      process.env.NEXT_PUBLIC_LOCAL_AUTH_ENABLED === "true" &&
+        process.env.NODE_ENV !== "production"
+        ? "local"
+        : "google",
+    );
 
   return (
-    <div className="flex justify-between px-5 pt-6">
+    <div className="flex items-center justify-between px-5 pt-6">
       <Link href="/">
-        <div className="relative h-[30px] w-[100px]">
+        <div className="relative h-[44px] w-[100px]">
           <Image
             src="/logo.png"
-            alt="FSW Foods"
+            alt="DD Foods"
             sizes="100%"
             fill
-            className="object-cover"
+            className="object-contain"
           />
         </div>
       </Link>
@@ -67,8 +75,10 @@ const Header = () => {
                       src={data?.user?.image as string | undefined}
                     />
                     <AvatarFallback>
-                      {data?.user?.name?.split(" ")[0][0]}
-                      {data?.user?.name?.split(" ")[1][0]}
+                      {nameParts
+                        .slice(0, 2)
+                        .map((part) => part[0])
+                        .join("") || "DD"}
                     </AvatarFallback>
                   </Avatar>
 
@@ -100,9 +110,12 @@ const Header = () => {
             <Button
               variant="ghost"
               className="w-full justify-start space-x-3 rounded-full text-sm font-normal"
+              asChild
             >
-              <HomeIcon size={16} />
-              <span className="block">Início</span>
+              <Link href="/">
+                <HomeIcon size={16} />
+                <span className="block">Início</span>
+              </Link>
             </Button>
 
             {data?.user && (

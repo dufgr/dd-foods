@@ -1,13 +1,16 @@
-import { Product } from "@prisma/client";
+import type { Product } from "@prisma/client";
 
-export const calculateProductTotalPrice = (product: Product): number => {
-  if (product.discountPercentage === 0) {
-    return Number(product.price);
-  }
-
-  const discount = Number(product.price) * (product.discountPercentage / 100);
-
-  return Number(product.price) - discount;
+export const calculateProductTotalPrice = (
+  product: Pick<Product, "discountPercentage"> & {
+    price: Product["price"] | number;
+  },
+): number => {
+  // Mantem calculos em centavos alinhados entre a sacola e o pedido persistido.
+  return (
+    Math.round(
+      Number(product.price) * (1 - product.discountPercentage / 100) * 100,
+    ) / 100
+  );
 };
 
 export const formatCurrency = (value: number): string => {

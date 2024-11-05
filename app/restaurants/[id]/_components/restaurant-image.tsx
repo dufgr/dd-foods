@@ -14,6 +14,7 @@ interface RestaurantImageProps {
   userFavoriteRestaurants: UserFavoriteRestaurant[];
 }
 
+// Exibe a imagem principal e as acoes de voltar e favoritar.
 const RestaurantImage = ({
   restaurant,
   userFavoriteRestaurants,

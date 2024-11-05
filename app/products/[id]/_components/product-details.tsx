@@ -26,22 +26,17 @@ import {
   formatCurrency,
   calculateProductTotalPrice,
 } from "@/app/_helpers/price";
-import { Prisma } from "@prisma/client";
+import type {
+  ProductCardData,
+  ProductDetailsData,
+} from "@/app/_lib/client-data";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import { useContext, useState } from "react";
 
 interface ProductDetailsProps {
-  product: Prisma.ProductGetPayload<{
-    include: {
-      restaurant: true;
-    };
-  }>;
-  complementaryProducts: Prisma.ProductGetPayload<{
-    include: {
-      restaurant: true;
-    };
-  }>[];
+  product: ProductDetailsData;
+  complementaryProducts: ProductCardData[];
 }
 
 const ProductDetails = ({
@@ -55,6 +50,7 @@ const ProductDetails = ({
 
   const { addProductToCart, products } = useContext(CartContext);
 
+  // Abre a sacola apos adicionar o produto ou substituir o restaurante atual.
   const addToCart = ({ emptyCart }: { emptyCart?: boolean }) => {
     addProductToCart({ product: { ...product, quantity }, emptyCart });
     setIsCartOpen(true);
@@ -77,7 +73,7 @@ const ProductDetails = ({
   };
 
   const handleIncreaseQuantityClick = () =>
-    setQuantity((currentState) => currentState + 1);
+    setQuantity((currentState) => Math.min(currentState + 1, 50));
   const handleDecreaseQuantityClick = () =>
     setQuantity((currentState) => {
       if (currentState === 1) return 1;
@@ -170,7 +166,7 @@ const ProductDetails = ({
       </div>
 
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-        <SheetContent className="w-[90vw]">
+        <SheetContent className="w-[90vw] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="text-left">Sacola</SheetTitle>
           </SheetHeader>

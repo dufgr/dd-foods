@@ -2,26 +2,41 @@ import { getServerSession } from "next-auth";
 import { db } from "../_lib/prisma";
 import RestaurantItem from "./restaurant-item";
 import { authOptions } from "../_lib/auth";
+import { RestaurantCardData } from "../_lib/client-data";
+import Carousel from "./carousel";
 
-const RestaurantList = async () => {
+// Busca restaurantes em destaque e os favoritos do usuario atual.
+const RestaurantList = async ({ take }: { take?: number }) => {
   const session = await getServerSession(authOptions);
 
   // TODO: pegar restaurantes com maior número de pedidos
-  const restaurants = await db.restaurant.findMany({ take: 10 });
-  const userFavoriteRestaurants = await db.userFavoriteRestaurant.findMany({
-    where: { userId: session?.user?.id },
-  });
+  const restaurants =
+    take === undefined
+      ? await db.restaurant.findMany()
+      : await db.restaurant.findMany({ take });
+  const userId = session?.user.id;
+  const userFavoriteRestaurants = userId
+    ? await db.userFavoriteRestaurant.findMany({ where: { userId } })
+    : [];
+  const favoriteRestaurantIds = userFavoriteRestaurants.map(
+    (favorite) => favorite.restaurantId,
+  );
 
   return (
-    <div className="flex gap-4 overflow-x-scroll px-5 [&::-webkit-scrollbar]:hidden">
+    <Carousel ariaLabel="Carrossel de restaurantes">
       {restaurants.map((restaurant) => (
         <RestaurantItem
           key={restaurant.id}
-          restaurant={restaurant}
-          userFavoriteRestaurants={userFavoriteRestaurants}
+          restaurant={
+            {
+              ...restaurant,
+              deliveryFee: Number(restaurant.deliveryFee),
+            } satisfies RestaurantCardData
+          }
+          favoriteRestaurantIds={favoriteRestaurantIds}
         />
       ))}
-    </div>
+    </Carousel>
   );
 };
 

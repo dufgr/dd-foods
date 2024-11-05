@@ -6,23 +6,15 @@ import { Card, CardContent } from "@/app/_components/ui/card";
 import { Separator } from "@/app/_components/ui/separator";
 import { CartContext } from "@/app/_context/cart";
 import { formatCurrency } from "@/app/_helpers/price";
-import { OrderStatus, Prisma } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext } from "react";
+import type { OrderItemData } from "@/app/_lib/client-data";
 
 interface OrderItemProps {
-  order: Prisma.OrderGetPayload<{
-    include: {
-      restaurant: true;
-      products: {
-        include: {
-          product: true;
-        };
-      };
-    };
-  }>;
+  order: OrderItemData;
 }
 
 const getOrderStatusLabel = (status: OrderStatus) => {
@@ -45,16 +37,18 @@ const OrderItem = ({ order }: OrderItemProps) => {
 
   const router = useRouter();
 
+  // Substitui a sacola inteira para nao misturar pedidos de restaurantes.
   const handleRedoOrderClick = () => {
-    for (const orderProduct of order.products) {
+    order.products.forEach((orderProduct, index) => {
       addProductToCart({
         product: {
           ...orderProduct.product,
           restaurant: order.restaurant,
           quantity: orderProduct.quantity,
         },
+        emptyCart: index === 0,
       });
-    }
+    });
 
     router.push(`/restaurants/${order.restaurantId}`);
   };

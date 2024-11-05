@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import Header from "../_components/header";
 import RestaurantItem from "../_components/restaurant-item";
 
+// Exibe apenas os restaurantes favoritados pela sessao autenticada.
 const MyFavoriteRestaurants = async () => {
   const session = await getServerSession(authOptions);
 
@@ -20,6 +21,9 @@ const MyFavoriteRestaurants = async () => {
       restaurant: true,
     },
   });
+  const favoriteRestaurantIds = userFavoriteRestaurants.map(
+    (favorite) => favorite.restaurantId,
+  );
 
   return (
     <>
@@ -31,9 +35,12 @@ const MyFavoriteRestaurants = async () => {
             userFavoriteRestaurants.map(({ restaurant }) => (
               <RestaurantItem
                 key={restaurant.id}
-                restaurant={restaurant}
-                className="min-w-full max-w-full"
-                userFavoriteRestaurants={userFavoriteRestaurants}
+                restaurant={{
+                  ...restaurant,
+                  deliveryFee: Number(restaurant.deliveryFee),
+                }}
+                className="!w-full !min-w-0 !max-w-none"
+                favoriteRestaurantIds={favoriteRestaurantIds}
               />
             ))
           ) : (

@@ -1,13 +1,16 @@
 import Image, { ImageProps } from "next/image";
 
-const PromoBanner = (props: ImageProps) => {
+type PromoBannerProps = Omit<ImageProps, "alt"> & { alt: string };
+
+// Exige texto alternativo e preserva dimensoes fluidas para os banners.
+const PromoBanner = ({ alt, ...props }: PromoBannerProps) => {
   return (
     <Image
-      height={0}
-      width={0}
+      alt={alt}
+      height={450}
+      width={1050}
       className="h-auto w-full object-contain"
       sizes="100%"
-      quality={100}
       {...props}
     />
   );

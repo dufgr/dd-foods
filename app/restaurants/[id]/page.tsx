@@ -10,12 +10,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/_lib/auth";
 
 interface RestaurantPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-const RestaurantPage = async ({ params: { id } }: RestaurantPageProps) => {
+// Carrega restaurante, catalogo e favoritos do usuario autenticado.
+const RestaurantPage = async ({ params }: RestaurantPageProps) => {
+  const { id } = await params;
   const restaurant = await db.restaurant.findUnique({
     where: {
       id,
@@ -58,16 +60,20 @@ const RestaurantPage = async ({ params: { id } }: RestaurantPageProps) => {
   }
   const session = await getServerSession(authOptions);
 
-  const userFavoriteRestaurants = await db.userFavoriteRestaurant.findMany({
-    where: {
-      userId: session?.user.id,
-    },
-  });
+  const userFavoriteRestaurants = session?.user.id
+    ? await db.userFavoriteRestaurant.findMany({
+        where: { userId: session.user.id },
+      })
+    : [];
 
   return (
-    <div>
+    <div className="pb-28">
       <RestaurantImage
-        restaurant={restaurant}
+        restaurant={{
+          id: restaurant.id,
+          name: restaurant.name,
+          imageUrl: restaurant.imageUrl,
+        }}
         userFavoriteRestaurants={userFavoriteRestaurants}
       />
 
@@ -112,18 +118,28 @@ const RestaurantPage = async ({ params: { id } }: RestaurantPageProps) => {
       <div className="mt-6 space-y-4">
         {/* TODO: mostrar produtos mais pedidos quando implementarmos realização de pedido */}
         <h2 className="px-5  font-semibold">Mais Pedidos</h2>
-        <ProductList products={restaurant.products} />
+        <ProductList
+          products={restaurant.products.map((product) => ({
+            ...product,
+            price: Number(product.price),
+          }))}
+        />
       </div>
 
       {restaurant.categories.map((category) => (
         <div className="mt-6 space-y-4" key={category.id}>
           {/* TODO: mostrar produtos mais pedidos quando implementarmos realização de pedido */}
           <h2 className="px-5  font-semibold">{category.name}</h2>
-          <ProductList products={category.products} />
+          <ProductList
+            products={category.products.map((product) => ({
+              ...product,
+              price: Number(product.price),
+            }))}
+          />
         </div>
       ))}
 
-      <CartBanner restaurant={restaurant} />
+      <CartBanner restaurant={{ id: restaurant.id }} />
     </div>
   );
 };

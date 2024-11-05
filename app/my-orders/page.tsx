@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Header from "../_components/header";
 import OrderItem from "./_components/order-item";
 
+// Restringe a consulta de pedidos ao usuario da sessao atual.
 const MyOrdersPage = async () => {
   const session = await getServerSession(authOptions);
 
@@ -25,6 +26,21 @@ const MyOrdersPage = async () => {
       },
     },
   });
+  const serializedOrders = orders.map((order) => ({
+    ...order,
+    totalPrice: Number(order.totalPrice),
+    restaurant: {
+      ...order.restaurant,
+      deliveryFee: Number(order.restaurant.deliveryFee),
+    },
+    products: order.products.map((orderProduct) => ({
+      ...orderProduct,
+      product: {
+        ...orderProduct.product,
+        price: Number(orderProduct.product.price),
+      },
+    })),
+  }));
 
   return (
     <>
@@ -34,7 +50,7 @@ const MyOrdersPage = async () => {
         <h2 className="pb-6 text-lg font-semibold">Meus Pedidos</h2>
 
         <div className="space-y-4">
-          {orders.map((order) => (
+          {serializedOrders.map((order) => (
             <OrderItem key={order.id} order={order} />
           ))}
         </div>

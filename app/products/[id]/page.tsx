@@ -4,12 +4,14 @@ import ProductImage from "./_components/product-image";
 import ProductDetails from "./_components/product-details";
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-const ProductPage = async ({ params: { id } }: ProductPageProps) => {
+// Busca o produto e complementos do mesmo restaurante antes de renderizar.
+const ProductPage = async ({ params }: ProductPageProps) => {
+  const { id } = await params;
   const product = await db.product.findUnique({
     where: {
       id,
@@ -32,18 +34,36 @@ const ProductPage = async ({ params: { id } }: ProductPageProps) => {
         id: product?.restaurant.id,
       },
     },
-    include: {
-      restaurant: true,
-    },
+    include: { restaurant: { select: { name: true } } },
   });
+  const serializedProduct = {
+    ...product,
+    price: Number(product.price),
+    restaurant: {
+      ...product.restaurant,
+      deliveryFee: Number(product.restaurant.deliveryFee),
+    },
+  };
+  const serializedJuices = juices.map((juice) => ({
+    ...juice,
+    price: Number(juice.price),
+  }));
 
   return (
     <div>
       {/* IMAGEM */}
-      <ProductImage product={product} />
+      <ProductImage
+        product={{
+          name: serializedProduct.name,
+          imageUrl: serializedProduct.imageUrl,
+        }}
+      />
 
       {/* TITULO E PREÇO */}
-      <ProductDetails product={product} complementaryProducts={juices} />
+      <ProductDetails
+        product={serializedProduct}
+        complementaryProducts={serializedJuices}
+      />
     </div>
   );
 };

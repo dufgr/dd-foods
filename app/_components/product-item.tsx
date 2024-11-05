@@ -1,29 +1,25 @@
 "use client";
 
-import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import { calculateProductTotalPrice, formatCurrency } from "../_helpers/price";
 import { ArrowDownIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "../_lib/utils";
+import type { ProductCardData } from "../_lib/client-data";
 
 interface ProductItemProps {
-  product: Prisma.ProductGetPayload<{
-    include: {
-      restaurant: {
-        select: {
-          name: true;
-        };
-      };
-    };
-  }>;
+  product: ProductCardData;
   className?: string;
 }
 
+// Resume imagem, preco com desconto e restaurante em um link de produto.
 const ProductItem = ({ product, className }: ProductItemProps) => {
   return (
     <Link
-      className={cn("w-[150px] min-w-[150px]", className)}
+      className={cn(
+        "w-[calc((100%_-_16px)_/_2)] min-w-0 shrink-0 snap-start min-[480px]:w-[calc((100%_-_32px)_/_3)] sm:w-[calc((100%_-_48px)_/_4)] md:w-[calc((100%_-_64px)_/_5)] lg:w-[calc((100%_-_80px)_/_6)] xl:w-[calc((100%_-_96px)_/_7)]",
+        className,
+      )}
       href={`/products/${product.id}`}
     >
       <div className="w-full space-y-2">
@@ -47,7 +43,7 @@ const ProductItem = ({ product, className }: ProductItemProps) => {
         </div>
 
         <div>
-          <h2 className="truncate text-sm">{product.name}</h2>
+          <h2 className="line-clamp-2 min-h-10 text-sm">{product.name}</h2>
           <div className="flex items-center gap-1">
             <h3 className="font-semibold">
               {formatCurrency(calculateProductTotalPrice(product))}

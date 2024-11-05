@@ -1,6 +1,5 @@
 "use client";
 
-import { Restaurant, UserFavoriteRestaurant } from "@prisma/client";
 import { BikeIcon, HeartIcon, StarIcon, TimerIcon } from "lucide-react";
 import Image from "next/image";
 import { formatCurrency } from "../_helpers/price";
@@ -10,43 +9,54 @@ import { cn } from "../_lib/utils";
 import { toggleFavoriteRestaurant } from "../_actions/restaurant";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import type { RestaurantCardData } from "../_lib/client-data";
 
 interface RestaurantItemProps {
-  restaurant: Restaurant;
+  restaurant: RestaurantCardData;
   className?: string;
-  userFavoriteRestaurants: UserFavoriteRestaurant[];
+  favoriteRestaurantIds: string[];
 }
 
+// Resume entrega e permite favoritar sem confiar no ID do usuario cliente.
 const RestaurantItem = ({
   restaurant,
   className,
-  userFavoriteRestaurants,
+  favoriteRestaurantIds,
 }: RestaurantItemProps) => {
   const { data } = useSession();
-  const isFavorite = userFavoriteRestaurants.some(
-    (fav) => fav.restaurantId === restaurant.id,
-  );
+  const router = useRouter();
+  const isFavorite = favoriteRestaurantIds.includes(restaurant.id);
 
   const handleFavoriteClick = async () => {
     if (!data?.user.id) return;
     try {
-      await toggleFavoriteRestaurant(data?.user.id, restaurant.id);
+      await toggleFavoriteRestaurant(restaurant.id);
+      router.refresh();
       toast.success(
         isFavorite
           ? "Restaurante removido dos favoritos."
           : "Restaurante favoritado.",
       );
-    } catch (error) {
+    } catch {
       toast.error("Erro ao favoritar restaurante.");
     }
   };
 
   return (
-    <div className={cn("min-w-[266px] max-w-[266px]", className)}>
+    <div
+      className={cn(
+        "w-full shrink-0 snap-start min-[480px]:w-[calc((100%_-_16px)_/_2)] sm:w-[calc((100%_-_32px)_/_3)] md:w-[calc((100%_-_48px)_/_4)] xl:w-[calc((100%_-_64px)_/_5)]",
+        className,
+      )}
+    >
       <div className="w-full space-y-3">
         {/* IMAGEM */}
         <div className="relative h-[136px] w-full">
-          <Link href={`/restaurants/${restaurant.id}`}>
+          <Link
+            href={`/restaurants/${restaurant.id}`}
+            className="absolute inset-0"
+          >
             <Image
               src={restaurant.imageUrl}
               fill

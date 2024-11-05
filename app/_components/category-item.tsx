@@ -6,6 +6,7 @@ interface CategoryItemProps {
   category: Category;
 }
 
+// Direciona a categoria selecionada para sua lista de produtos.
 const CategoryItem = ({ category }: CategoryItemProps) => {
   return (
     <Link

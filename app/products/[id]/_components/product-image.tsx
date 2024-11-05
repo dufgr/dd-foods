@@ -10,6 +10,7 @@ interface ProductImageProps {
   product: Pick<Product, "name" | "imageUrl">;
 }
 
+// Apresenta a imagem do produto com um controle para voltar.
 const ProductImage = ({ product }: ProductImageProps) => {
   const router = useRouter();
 

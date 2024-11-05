@@ -9,6 +9,7 @@ import PromoBanner from "./_components/promo-banner";
 import RestaurantList from "./_components/restaurant-list";
 import Link from "next/link";
 
+// Carrega em paralelo os destaques e categorias usados na pagina inicial.
 const fetch = async () => {
   const getProducts = db.product.findMany({
     where: {
@@ -44,9 +45,17 @@ const fetch = async () => {
     getPizzasCategory,
   ]);
 
-  return { products, burguersCategory, pizzasCategory };
+  return {
+    products: products.map((product) => ({
+      ...product,
+      price: Number(product.price),
+    })),
+    burguersCategory,
+    pizzasCategory,
+  };
 };
 
+// Monta a vitrine inicial com categorias, ofertas e restaurantes.
 const Home = async () => {
   const { products, burguersCategory, pizzasCategory } = await fetch();
 
@@ -66,6 +75,7 @@ const Home = async () => {
           <PromoBanner
             src="/promo-banner-01.png"
             alt="Até 30% de desconto em pizzas!"
+            loading="eager"
           />
         </Link>
       </div>

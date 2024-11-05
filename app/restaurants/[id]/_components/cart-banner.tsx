@@ -17,6 +17,7 @@ interface CartBannerProps {
   restaurant: Pick<Restaurant, "id">;
 }
 
+// Mostra o total do restaurante atual e mantem a sacola acessivel na tela.
 const CartBanner = ({ restaurant }: CartBannerProps) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { products, totalPrice, totalQuantity } = useContext(CartContext);
@@ -28,12 +29,12 @@ const CartBanner = ({ restaurant }: CartBannerProps) => {
   if (!restaurantHasProductsOnCart) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 w-full border-t border-solid border-muted bg-white p-5 pt-3 shadow-md">
-      <div className="flex items-center justify-between">
+    <div className="fixed bottom-0 left-0 z-50 w-full border-t border-solid border-muted bg-white px-5 pb-5 pt-3 shadow-md">
+      <div className="mx-auto flex max-w-[1280px] items-center justify-between">
         {/* PREÇO */}
         <div>
           <span className="text-xs text-muted-foreground">
-            Total sem entrega
+            Total com entrega
           </span>
           <h3 className="font-semibold">
             {formatCurrency(totalPrice)}{" "}
@@ -48,7 +49,7 @@ const CartBanner = ({ restaurant }: CartBannerProps) => {
         <Button onClick={() => setIsCartOpen(true)}>Ver sacola</Button>
 
         <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-          <SheetContent className="w-[90vw]">
+          <SheetContent className="w-[90vw] overflow-y-auto">
             <SheetHeader>
               <SheetTitle className="text-left">Sacola</SheetTitle>
             </SheetHeader>
