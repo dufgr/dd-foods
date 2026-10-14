@@ -1,97 +1,97 @@
 # DD Foods
 
-Marketplace de delivery desenvolvido com Next.js, com busca de restaurantes, catalogo de produtos, sacola e acompanhamento de pedidos. A interface adapta-se a celulares, tablets e desktops, mantendo o conteudo principal limitado a 1280 px.
+A food delivery marketplace built with Next.js, featuring restaurant search, a product catalog, a shopping cart, and order tracking. The responsive interface supports mobile, tablet, and desktop screens while keeping the main content within a 1280 px width.
 
 ## Preview
 
-<!-- Adicione aqui capturas de tela mobile e desktop ou o link da demonstracao publicada. -->
+<!-- Add mobile and desktop screenshots or a link to the live demo here. -->
 
-## Funcionalidades
+## Features
 
-- Busca de restaurantes por nome e navegacao por categorias.
-- Catalogo de produtos com ofertas, descontos e informacoes de entrega.
-- Sacola restrita a um restaurante, com calculo de subtotal, descontos e entrega.
-- Finalizacao de pedido com precos recalculados e validados no servidor.
-- Login com Google e login simulado exclusivo para desenvolvimento local.
-- Historico de pedidos, opcao de refazer pedidos e restaurantes favoritos.
-- Layout responsivo com navegacao adaptada a telas pequenas e grandes.
+- Search for restaurants by name and browse by category.
+- Explore a product catalog with offers, discounts, and delivery information.
+- Shop from one restaurant at a time, with subtotal, discount, and delivery fee calculations.
+- Place orders with prices recalculated and validated on the server.
+- Sign in with Google or use a mock login available only during local development.
+- View order history, reorder previous purchases, and manage favorite restaurants.
+- Use a responsive layout with navigation adapted to small and large screens.
 
-## Stack Tecnologica
+## Technology Stack
 
-| Tecnologia                | Versao / Uso                                                  |
-| ------------------------- | ------------------------------------------------------------- |
-| Next.js                   | 16.4.1, App Router e Server Actions                           |
-| React / React DOM         | 19.3.1                                                        |
-| TypeScript                | 5.x                                                           |
-| Tailwind CSS              | 3.4.19                                                        |
-| Prisma / Prisma Client    | 5.22.0                                                        |
-| PostgreSQL                | 16, via Docker Compose no ambiente local                      |
-| NextAuth                  | 4.24.15, Google OAuth e autenticacao local de desenvolvimento |
-| Radix UI, Lucide e Sonner | Componentes acessiveis, icones e notificacoes                 |
+| Technology                | Version / Usage                                                   |
+| ------------------------- | ----------------------------------------------------------------- |
+| Next.js                   | 16.4.1, App Router, and Server Actions                            |
+| React / React DOM         | 19.3.1                                                            |
+| TypeScript                | 5.x                                                               |
+| Tailwind CSS              | 3.4.19                                                            |
+| Prisma / Prisma Client    | 5.22.0                                                            |
+| PostgreSQL                | 16, via Docker Compose for local development                      |
+| NextAuth                  | 4.24.15, Google OAuth, and local development authentication       |
+| Radix UI, Lucide, Sonner   | Accessible components, icons, and notifications                   |
 
-## Arquitetura e Decisoes Tecnicas
+## Architecture and Technical Decisions
 
-- O App Router organiza paginas dinamicas e componentes de servidor e cliente.
-- Prisma acessa o PostgreSQL; migrations versionam o schema e o seed cria dados de demonstracao.
-- As Server Actions derivam a identidade do usuario da sessao. A criacao de pedidos consulta novamente produtos, quantidades, descontos e entrega no banco antes de persistir valores.
-- A sacola e mantida em contexto React e aceita produtos de um restaurante por vez.
-- O container PostgreSQL e destinado ao desenvolvimento local. Para deploy serverless, use um banco gerenciado acessivel pela aplicacao hospedada.
+- The App Router organizes dynamic pages and server and client components.
+- Prisma connects to PostgreSQL; migrations version the schema, and the seed script creates demo data.
+- Server Actions derive user identity from the session. Before saving an order, the server fetches product prices, quantities, discounts, and delivery fees from the database and recalculates the total.
+- The shopping cart is managed with React context and supports products from one restaurant at a time.
+- The PostgreSQL container is intended for local development. For a serverless deployment, use a managed database accessible to the hosted application.
 
-## Executar Localmente
+## Run Locally
 
-### Requisitos
+### Requirements
 
-- Node.js 20.9 ou superior e npm.
-- Docker Desktop em execucao.
+- Node.js 20.9 or later and npm.
+- Docker Desktop running.
 
-### Instalar e configurar
+### Install and Configure
 
-1. Instale as dependencias:
+1. Install the dependencies:
 
    ```bash
    npm install
    ```
 
-2. Copie o arquivo de exemplo para `.env`:
+2. Copy the example environment file to `.env`:
 
    ```powershell
    Copy-Item .env.example .env
    ```
 
-3. Substitua `NEXTAUTH_SECRET` por um segredo aleatorio. Um valor pode ser gerado com:
+3. Replace `NEXTAUTH_SECRET` with a random secret. Generate one with:
 
    ```bash
    node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
    ```
 
-   O valor local de `NEXT_PUBLIC_LOCAL_AUTH_ENABLED` deve permanecer `true` para habilitar o login simulado em desenvolvimento. Esse mecanismo e desativado automaticamente em producao. As credenciais Google podem ficar vazias no ambiente local.
+   Keep `NEXT_PUBLIC_LOCAL_AUTH_ENABLED` set to `true` locally to enable mock authentication during development. This mechanism is automatically disabled in production. Google credentials can be left empty in the local environment.
 
-### Banco de dados
+### Database
 
-1. Inicie o PostgreSQL local:
+1. Start the local PostgreSQL database:
 
    ```bash
    docker compose up -d
    ```
 
-2. Aplique as migrations e carregue os dados de demonstracao:
+2. Apply migrations and load the demo data:
 
    ```bash
    npx prisma migrate deploy
    npx prisma db seed
    ```
 
-O Compose disponibiliza o banco `dd_foods` em `localhost:5432`. As credenciais locais e a URL correspondente estao no `.env.example`.
+Docker Compose makes the `dd_foods` database available at `localhost:5432`. The local credentials and connection URL are provided in `.env.example`.
 
-### Iniciar a aplicacao
+### Start the Application
 
 ```bash
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000). O botao de login usa o usuario local de desenvolvimento quando `NEXT_PUBLIC_LOCAL_AUTH_ENABLED=true`.
+Open [http://localhost:3000](http://localhost:3000). The login button uses the local development user when `NEXT_PUBLIC_LOCAL_AUTH_ENABLED=true`.
 
-### Validacoes
+### Validation
 
 ```bash
 npm run lint
@@ -99,6 +99,6 @@ npx tsc --noEmit
 npm run build
 ```
 
-## Deploy
+## Deployment
 
-O projeto esta preparado para build no Next.js e hospedagem serverless na Vercel. Configure no ambiente de producao `DATABASE_URL` para um PostgreSQL gerenciado, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`. O login local e ignorado em producao. Nenhum deploy ou banco remoto foi configurado.
+The project is configured for Next.js builds and serverless hosting on Vercel. In the production environment, configure `DATABASE_URL` to point to a managed PostgreSQL database, along with `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`. Local authentication is disabled in production. No deployment or remote database has been configured.
